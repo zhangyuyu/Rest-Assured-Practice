@@ -1,30 +1,11 @@
 package com.restassured.apitest.workshop;
 
-import io.restassured.builder.RequestSpecBuilder;
-import io.restassured.builder.ResponseSpecBuilder;
-import io.restassured.http.ContentType;
-import io.restassured.http.Headers;
-import io.restassured.matcher.ResponseAwareMatcher;
-import io.restassured.response.Response;
-import io.restassured.specification.RequestSpecification;
-import io.restassured.specification.ResponseSpecification;
-import org.hamcrest.Matcher;
-import org.hamcrest.Matchers;
 import org.junit.Test;
 import org.w3c.dom.events.EventException;
 
-import java.util.Map;
-import java.util.regex.Pattern;
-
 import static io.restassured.RestAssured.given;
-import static io.restassured.matcher.ResponseAwareMatcherComposer.and;
-import static io.restassured.matcher.RestAssuredMatchers.endsWithPath;
-import static io.restassured.module.jsv.JsonSchemaValidator.matchesJsonSchemaInClasspath;
-import static org.hamcrest.CoreMatchers.*;
-import static org.hamcrest.Matchers.*;
-import static org.hamcrest.Matchers.hasItems;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.hasItems;
 
 public class PracticeResponse {
 
@@ -42,18 +23,28 @@ public class PracticeResponse {
     //https://github.com/rest-assured/rest-assured/wiki/Usage#getting-response-data
     @Test
     public void testGetAllResponse() throws EventException {
+        String response = given()
+                .when()
+                .get("https://www.googleapis.com/books/v1/volumes?q=cucumber&maxResults=2")
+                .asString();
 
+        System.out.println(response);
     }
-
 
 
     //直接从response body中查找特定值
     //https://github.com/rest-assured/rest-assured/wiki/Usage#example-1---json
     @Test
-        public void testResponseBasicUsage() throws EventException {
-
+    public void testResponseBasicUsage() throws EventException {
+        given()
+                .when()
+                .get("https://www.googleapis.com/books/v1/volumes?q=cucumber&maxResults=2")
+                .then()
+                .body("kind", equalTo("books#volumes"))
+                .body("totalItems", equalTo(572))
+                .body("items.id", hasItems("0dge3Xh6EjUC", "YuC_HK8b6_4C"))
+                .body("items[0].volumeInfo.title", equalTo("Advances in Sea Cucumber Aquaculture and Management"));
     }
-
 
 
     //https://developers.google.com/books/docs/v1/reference/volumes/list
@@ -61,10 +52,13 @@ public class PracticeResponse {
     //https://github.com/rest-assured/rest-assured/wiki/Usage#extracting-values-from-the-response-after-validation
     @Test
     public void testExtractFragmentFromGoogleBookResponse() throws EventException {
+        given()
+                .when()
+                .get("https://www.googleapis.com/books/v1/volumes?q=cucumber&maxResults=2")
+                .then()
+                .body("items[0].selfLink", response -> equalTo("https://www.googleapis.com/books/v1/volumes/" + response.path("items[0].id")));
 
     }
-
-
 
     //https://developers.google.com/books/docs/v1/reference/volumes/list
     //使用extract method提取header和cookie
@@ -73,7 +67,6 @@ public class PracticeResponse {
     public void testExtractAllResponse() throws EventException {
 
     }
-
 
 
     //https://developers.google.com/books/docs/v1/reference/volumes/list
@@ -85,7 +78,6 @@ public class PracticeResponse {
     }
 
 
-
     //https://developers.google.com/books/docs/v1/reference/volumes/list
     //使用Response的一部分去验证Response另一部分
     //https://github.com/rest-assured/rest-assured/wiki/Usage#use-the-response-to-verify-other-parts-of-the-response
@@ -93,7 +85,6 @@ public class PracticeResponse {
     public void testUsePartInResponse() throws EventException {
 
     }
-
 
 
     //https://developers.google.com/books/docs/v1/reference/volumes/list
@@ -105,14 +96,12 @@ public class PracticeResponse {
     }
 
 
-
     //https://developers.google.com/books/docs/v1/reference/volumes/list
     // https://github.com/rest-assured/rest-assured/wiki/Usage#json-schema-validation -> Example 3 - Complex parsing and validation
     @Test
     public void testGroovyCollection2() throws EventException {
 
     }
-
 
 
     //https://developers.google.com/books/docs/v1/reference/volumes/list
@@ -122,7 +111,6 @@ public class PracticeResponse {
     public void testGroovyCollection3() throws EventException {
 
     }
-
 
 
     //https://developers.google.com/books/docs/v1/reference/volumes/list

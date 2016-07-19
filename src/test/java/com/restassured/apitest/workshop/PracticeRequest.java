@@ -1,15 +1,9 @@
 package com.restassured.apitest.workshop;
 
-import io.restassured.http.ContentType;
 import org.junit.Test;
 import org.w3c.dom.events.EventException;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import static io.restassured.RestAssured.given;
-import static java.util.Arrays.asList;
 
 
 public class PracticeRequest {
@@ -18,15 +12,20 @@ public class PracticeRequest {
     //  Google Book API reference  https://developers.google.com/books/docs/v1/reference/volumes/list
     //  Google Sheets API reference  https://developers.google.com/sheets/reference/rest/
     private static String token = "ya29.CjAlA6dfrtNjYkpcqCKQTzqLApcIbLuhAlYMdFezgSMIX3oNfBw00gnTBz9ySkciW5o";
-    private static String spreadID ="14jSUH8DoGN3k-QqIV6qIocW-ZYlN_RL507SXjYN7AgM";
+    private static String spreadID = "14jSUH8DoGN3k-QqIV6qIocW-ZYlN_RL507SXjYN7AgM";
 
     //https://developers.google.com/books/docs/v1/reference/volumes/list
     //发送get请求，返回书名为含有cucumber的书，并返回两个结果
     @Test
     public void testGoogleBookAPIDataInURL() throws EventException {
+        given()
+                .when()
+                .get("https://www.googleapis.com/books/v1/volumes?q=cucumber&maxResults=2")
+                .then()
+                .log().all()
+                .statusCode(200);
 
     }
-
 
 
     //https://developers.google.com/books/docs/v1/reference/volumes/list
@@ -34,9 +33,15 @@ public class PracticeRequest {
     //https://github.com/rest-assured/rest-assured/wiki/Usage#syntactic-sugar
     @Test
     public void testGoogleBookAPIDataInParameters() throws EventException {
-
+        given()
+                .param("q", "cucumber")
+                .param("maxResults", "2")
+                .when()
+                .get("https://www.googleapis.com/books/v1/volumes")
+                .then()
+                .log().all()
+                .statusCode(200);
     }
-
 
 
     //https://developers.google.com/sheets/reference/rest/v4/spreadsheets.values/update
@@ -45,9 +50,31 @@ public class PracticeRequest {
     //https://github.com/rest-assured/rest-assured/wiki/Usage#request-body
     @Test
     public void testGoogleSheetsAPIDataInBody() throws EventException {
-
+        String body = "{\n" +
+                " \"range\": \"People!A51:E5\",\n" +
+                " \"majorDimension\": \"ROWS\",\n" +
+                " \"values\": [\n" +
+                "   [\n" +
+                "     \"ZhangYu\",\n" +
+                "     \"Hello\",\n" +
+                "     \"FeMale\",\n" +
+                "     \"White\",\n" +
+                "     \"Apple\"\n" +
+                "   ]\n" +
+                " ]\n" +
+                "}";
+        given()
+                .auth().oauth2(token)
+                .pathParam("spreadsheetId", spreadID)
+                .pathParam("range", "People!A51:E5")
+                .param("valueInputOption", "USER_ENTERED")
+                .body(body)
+                .when()
+                .put("https://sheets.googleapis.com/v4/spreadsheets/{spreadsheetId}/values/{range}")
+                .then()
+                .log().all()
+                .statusCode(200);
     }
-
 
 
     //https://developers.google.com/sheets/reference/rest/v4/spreadsheets.values/update
@@ -59,15 +86,13 @@ public class PracticeRequest {
     }
 
 
-
     //https://developers.google.com/sheets/reference/rest/v4/spreadsheets.values/update
     //发送PUT请求，Update GoogleSheet中的一行数据 - 序列化
     //https://github.com/rest-assured/rest-assured/wiki/Usage#serialization
     @Test
-    public void testGoogleSheetsAPIObjectDataInBody(){
+    public void testGoogleSheetsAPIObjectDataInBody() {
 
     }
-
 
 
     //https://developers.google.com/sheets/reference/rest/v4/spreadsheets/batchUpdate
